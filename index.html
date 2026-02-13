@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌸 PolyMath Quest: Suma de Polinomios</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #ffeef8 0%, #e0f7fa 50%, #fff3e0 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .pastel-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(255, 182, 193, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+        }
+        
+        .pastel-btn {
+            background: linear-gradient(135deg, #ffb6c1 0%, #ffd1dc 100%);
+            border: none;
+            border-radius: 16px;
+            color: white;
+            font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(255, 182, 193, 0.4);
+            font-family: 'Fredoka', sans-serif;
+        }
+        
+        .pastel-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(255, 182, 193, 0.6);
+        }
+        
+        .pastel-btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+        
+        .pastel-btn.blue {
+            background: linear-gradient(135deg, #a8d8ea 0%, #b5e7f0 100%);
+            box-shadow: 0 4px 15px rgba(168, 216, 234, 0.4);
+        }
+        
+        .pastel-btn.blue:hover {
+            box-shadow: 0 8px 25px rgba(168, 216, 234, 0.6);
+        }
+        
+        .pastel-btn.green {
+            background: linear-gradient(135deg, #b8e0d2 0%, #c8f0e3 100%);
+            box-shadow: 0 4px 15px rgba(184, 224, 210, 0.4);
+        }
+        
+        .pastel-btn.green:hover {
+            box-shadow: 0 8px 25px rgba(184, 224, 210, 0.6);
+        }
+        
+        .pastel-btn.purple {
+            background: linear-gradient(135deg, #d4b5e0 0%, #e0c8f0 100%);
+            box-shadow: 0 4px 15px rgba(212, 181, 224, 0.4);
+        }
+        
+        .term-card {
+            background: linear-gradient(135deg, #fff5f7 0%, #fff0f3 100%);
+            border: 2px solid #ffd1dc;
+            border-radius: 16px;
+            padding: 12px 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: 6px;
+            transition: all 0.3s ease;
+            cursor: grab;
+            user-select: none;
+        }
+        
+        .term-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 182, 193, 0.3);
+        }
+        
+        .term-card.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+        
+        .term-card.matched {
+            background: linear-gradient(135deg, #d4f8d4 0%, #e0f8e0 100%);
+            border-color: #90ee90;
+            animation: pulse 0.6s ease;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .bounce-in {
+            animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, #ffd1dc 0%, #ffb6c1 100%);
+            height: 12px;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffd1dc 0%, #ffb6c1 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            box-shadow: 0 4px 15px rgba(255, 182, 193, 0.4);
+        }
+        
+        .drop-zone {
+            min-height: 80px;
+            border: 3px dashed #ffd1dc;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+        }
+        
+        .drop-zone.drag-over {
+            background: rgba(255, 209, 220, 0.3);
+            border-color: #ffb6c1;
+            transform: scale(1.02);
+        }
+        
+        .star {
+            color: #ffd700;
+            filter: drop-shadow(0 2px 4px rgba(255, 215, 0, 0.4));
+        }
+        
+        .hidden-section {
+            display: none;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .math-text {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.3rem;
+            color: #5a5a5a;
+        }
+        
+        .exponent {
+            font-size: 0.7em;
+            vertical-align: super;
+            color: #ff8fa3;
+            font-weight: bold;
+        }
+        
+        .badge {
+            background: linear-gradient(135deg, #fff9c4 0%, #fff59d 100%);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-weight: 700;
+            color: #f9a825;
+            border: 2px solid #fff176;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+        
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            animation: particle 1s ease-out forwards;
+        }
+        
+        @keyframes particle {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <!-- Header -->
+    <header class="max-w-6xl mx-auto mb-8 flex justify-between items-center">
+        <div class="flex items-center gap-4">
+            <div class="avatar floating">🌸</div>
+            <div>
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-700" style="font-family: 'Fredoka', sans-serif;">
+                    PolyMath <span class="text-pink-400">Quest</span>
+                </h1>
+                <p class="text-gray-500 font-semibold">Aventura de Polinomios</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="badge">
+                <span>⭐</span>
+                <span id="totalScore">0</span> XP
+            </div>
+            <div class="badge" style="background: linear-gradient(135deg, #e1f5fe 0%, #b3e5fc 100%); color: #0288d1; border-color: #81d4fa;">
+                <span>🏆</span>
+                <span id="level">Nivel 1</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-6xl mx-auto">
+        
+        <!-- Navigation Tabs -->
+        <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
+            <button onclick="showSection('learn')" class="pastel-btn px-6 py-3 text-lg whitespace-nowrap" id="tab-learn">
+                📚 Aprender
+            </button>
+            <button onclick="showSection('practice')" class="pastel-btn blue px-6 py-3 text-lg whitespace-nowrap" id="tab-practice">
+                🎮 Practicar
+            </button>
+            <button onclick="showSection('challenge')" class="pastel-btn purple px-6 py-3 text-lg whitespace-nowrap" id="tab-challenge">
+                ⚔️ Desafío
+            </button>
+        </div>
+
+        <!-- Learn Section -->
+        <section id="learn-section" class="fade-in">
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Theory Card -->
+                <div class="pastel-card p-8">
+                    <h2 class="text-2xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                        <span class="text-3xl">🌟</span> ¿Qué es un Polinomio?
+                    </h2>
+                    <div class="space-y-4 text-gray-600 leading-relaxed">
+                        <p class="math-text bg-pink-50 p-4 rounded-xl border-l-4 border-pink-300">
+                            Un <strong>polinomio</strong> es una expresión algebraica formada por la suma de varios <strong>términos</strong>.
+                        </p>
+                        <div class="bg-blue-50 p-4 rounded-xl">
+                            <p class="font-bold text-blue-600 mb-2">Ejemplo:</p>
+                            <p class="math-text text-center text-2xl">
+                                3x<span class="exponent">2</span> + 2x - 5
+                            </p>
+                        </div>
+                        <ul class="space-y-2 mt-4">
+                            <li class="flex items-start gap-2">
+                                <span class="text-pink-400 font-bold">•</span>
+                                <span><strong>3x²</strong> → Término con x al cuadrado (grado 2)</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-blue-400 font-bold">•</span>
+                                <span><strong>2x</strong> → Término con x (grado 1)</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-green-400 font-bold">•</span>
+                                <span><strong>-5</strong> → Término constante (grado 0)</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Rules Card -->
+                <div class="pastel-card p-8">
+                    <h2 class="text-2xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                        <span class="text-3xl">🎯</span> Reglas de la Suma
+                    </h2>
+                    <div class="space-y-4">
+                        <div class="bg-gradient-to-r from-pink-50 to-purple-50 p-4 rounded-xl border-2 border-pink-200">
+                            <p class="font-bold text-pink-600 mb-2">Regla de Oro:</p>
+                            <p class="text-lg text-gray-700">¡Solo se pueden sumar <strong>términos semejantes!</strong></p>
+                            <p class="text-sm text-gray-500 mt-1">(misma variable y mismo exponente)</p>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3 bg-yellow-50 p-3 rounded-lg">
+                                <span class="text-2xl">✅</span>
+                                <div>
+                                    <p class="font-bold text-gray-700">3x² + 5x² = 8x²</p>
+                                    <p class="text-sm text-gray-500">Misma letra y exponente</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 bg-red-50 p-3 rounded-lg">
+                                <span class="text-2xl">❌</span>
+                                <div>
+                                    <p class="font-bold text-gray-700">3x² + 2x</p>
+                                    <p class="text-sm text-gray-500">¡No se pueden sumar! (diferentes exponentes)</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 p-4 bg-green-50 rounded-xl border-2 border-green-200">
+                            <p class="font-bold text-green-700 mb-2">💡 Tip Visual:</p>
+                            <p class="text-gray-600">Imagina que x² son 🍎 manzanas y x son 🍌 plátanos. ¡No puedes sumar manzanas con plátanos!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step by Step -->
+                <div class="pastel-card p-8 md:col-span-2">
+                    <h2 class="text-2xl font-bold text-gray-700 mb-6 flex items-center gap-2">
+                        <span class="text-3xl">📝</span> Paso a Paso
+                    </h2>
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-pink-200 relative overflow-hidden">
+                            <div class="absolute top-0 right-0 bg-pink-400 text-white w-8 h-8 rounded-bl-xl flex items-center justify-center font-bold">1</div>
+                            <h3 class="font-bold text-pink-600 mb-2">Identifica</h3>
+                            <p class="text-gray-600 text-sm">Encuentra los términos semejantes (misma letra y exponente)</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-blue-200 relative overflow-hidden">
+                            <div class="absolute top-0 right-0 bg-blue-400 text-white w-8 h-8 rounded-bl-xl flex items-center justify-center font-bold">2</div>
+                            <h3 class="font-bold text-blue-600 mb-2">Agrupa</h3>
+                            <p class="text-gray-600 text-sm">Coloca juntos los términos que se pueden sumar</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-green-200 relative overflow-hidden">
+                            <div class="absolute top-0 right-0 bg-green-400 text-white w-8 h-8 rounded-bl-xl flex items-center justify-center font-bold">3</div>
+                            <h3 class="font-bold text-green-600 mb-2">Suma</h3>
+                            <p class="text-gray-600 text-sm">Suma los coeficientes y conserva la parte literal</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-2xl border-2 border-purple-200">
+                        <h3 class="font-bold text-purple-700 mb-3">Ejemplo Completo:</h3>
+                        <div class="math-text text-center space-y-2">
+                            <p>(3x<span class="exponent">2</span> + 2x - 5) + (2x<span class="exponent">2</span> - 3x + 7)</p>
+                            <p class="text-pink-500">↓</p>
+                            <p>= 3x<span class="exponent">2</span> + 2x<span class="exponent">2</span> + 2x - 3x - 5 + 7</p>
+                            <p class="text-blue-500">↓</p>
+                            <p>= <span class="bg-yellow-200 px-2 rounded">5x<span class="exponent">2</span></span> <span class="bg-green-200 px-2 rounded">- x</span> <span class="bg-pink-200 px-2 rounded">+ 2</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Practice Section -->
+        <section id="practice-section" class="hidden-section">
+            <div class="pastel-card p-8 mb-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-700">🧩 Modo Práctica: Une los Términos</h2>
+                    <div class="flex items-center gap-2">
+                        <span class="text-gray-500">Progreso:</span>
+                        <div class="w-32 bg-gray-200 rounded-full h-3">
+                            <div class="progress-bar rounded-full" id="practiceProgress" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-blue-50 p-6 rounded-2xl mb-6 text-center">
+                    <p class="text-gray-600 mb-2">Suma los siguientes polinomios arrastrando los términos semejantes:</p>
+                    <div class="math-text text-2xl font-bold text-gray-700" id="practiceProblem">
+                        (4x<span class="exponent">2</span> + 3x - 2) + (2x<span class="exponent">2</span> - x + 5)
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="font-bold text-gray-600 mb-3 flex items-center gap-2">
+                            <span class="text-pink-500">🎲</span> Términos disponibles:
+                        </h3>
+                        <div id="termsContainer" class="flex flex-wrap min-h-[120px] p-4 bg-white rounded-2xl border-2 border-dashed border-pink-200">
+                            <!-- Terms will be inserted here -->
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-bold text-gray-600 mb-3 flex items-center gap-2">
+                            <span class="text-green-500">🎯</span> Zona de agrupación:
+                        </h3>
+                        <div id="dropZone" class="drop-zone flex flex-wrap items-center p-4">
+                            <p class="text-gray-400 w-full text-center">Arrastra aquí los términos semejantes...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-center gap-4">
+                    <button onclick="checkPractice()" class="pastel-btn green px-8 py-3 text-lg">
+                        ✅ Verificar
+                    </button>
+                    <button onclick="resetPractice()" class="pastel-btn px-8 py-3 text-lg">
+                        🔄 Reiniciar
+                    </button>
+                </div>
+
+                <div id="practiceFeedback" class="mt-4 text-center font-bold text-lg hidden"></div>
+            </div>
+
+            <!-- Interactive Calculator -->
+            <div class="pastel-card p-8">
+                <h2 class="text-2xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                    <span class="text-3xl">🧮</span> Calculadora de Polinomios
+                </h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-gray-600 font-bold mb-2">Polinomio 1:</label>
+                            <input type="text" id="poly1" placeholder="Ej: 3x^2 + 2x - 5" 
+                                class="w-full p-4 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:outline-none text-lg font-mono"
+                                oninput="validateInput(this)">
+                        </div>
+                        <div>
+                            <label class="block text-gray-600 font-bold mb-2">Polinomio 2:</label>
+                            <input type="text" id="poly2" placeholder="Ej: 2x^2 - 3x + 7" 
+                                class="w-full p-4 rounded-xl border-2 border-blue-200 focus:border-blue-400 focus:outline-none text-lg font-mono"
+                                oninput="validateInput(this)">
+                        </div>
+                        <button onclick="calculateSum()" class="pastel-btn blue w-full py-3 text-lg">
+                            ➕ Sumar Polinomios
+                        </button>
+                    </div>
+                    <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-2xl border-2 border-purple-200 flex flex-col justify-center items-center">
+                        <p class="text-gray-500 font-bold mb-2">Resultado:</p>
+                        <div id="calcResult" class="math-text text-3xl font-bold text-purple-600 min-h-[60px] flex items-center">
+                            ?
+                        </div>
+                        <div id="calcSteps" class="mt-4 text-sm text-gray-600 w-full hidden">
+                            <div class="border-t border-purple-200 pt-2 mt-2">
+                                <p class="font-bold text-purple-500">Pasos:</p>
+                                <ol id="stepsList" class="list-decimal list-inside space-y-1 mt-1"></ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Challenge Section -->
+        <section id="challenge-section" class="hidden-section">
+            <div class="pastel-card p-8">
+                <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-700 flex items-center gap-2">
+                            <span class="text-3xl">⚔️</span> Modo Desafío
+                        </h2>
+                        <p class="text-gray-500">Resuelve correctamente para ganar estrellas</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="flex gap-1" id="lives">
+                            <span class="text-2xl">❤️</span>
+                            <span class="text-2xl">❤️</span>
+                            <span class="text-2xl">❤️</span>
+                        </div>
+                        <div class="badge text-xl">
+                            <span>⭐</span>
+                            <span id="challengeScore">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-yellow-50 to-orange-50 p-8 rounded-2xl border-2 border-yellow-200 mb-6 text-center relative overflow-hidden">
+                    <div class="absolute top-2 right-2 text-6xl opacity-10">⭐</div>
+                    <p class="text-gray-600 mb-4 font-bold">Desafío <span id="challengeNumber">1</span>:</p>
+                    <div class="math-text text-3xl md:text-4xl font-bold text-gray-800 mb-4" id="challengeProblem">
+                        Cargando...
+                    </div>
+                    <div class="flex justify-center gap-2 flex-wrap" id="challengeOptions">
+                        <!-- Options will be inserted here -->
+                    </div>
+                </div>
+
+                <div id="challengeFeedback" class="hidden text-center p-4 rounded-xl mb-4 font-bold text-lg"></div>
+
+                <div class="flex justify-center">
+                    <button onclick="nextChallenge()" class="pastel-btn purple px-8 py-3 text-lg hidden" id="nextChallengeBtn">
+                        Siguiente Desafío ➡️
+                    </button>
+                </div>
+            </div>
+
+            <!-- Achievement Board -->
+            <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4" id="achievements">
+                <div class="pastel-card p-4 text-center opacity-50" id="ach-1">
+                    <div class="text-3xl mb-2">🌱</div>
+                    <p class="font-bold text-sm text-gray-600">Principiante</p>
+                    <p class="text-xs text-gray-400">Completa 1 desafío</p>
+                </div>
+                <div class="pastel-card p-4 text-center opacity-50" id="ach-2">
+                    <div class="text-3xl mb-2">🌿</div>
+                    <p class="font-bold text-sm text-gray-600">Estudiante</p>
+                    <p class="text-xs text-gray-400">5 correctas seguidas</p>
+                </div>
+                <div class="pastel-card p-4 text-center opacity-50" id="ach-3">
+                    <div class="text-3xl mb-2">🌸</div>
+                    <p class="font-bold text-sm text-gray-600">Experto</p>
+                    <p class="text-xs text-gray-400">Alcanza 100 XP</p>
+                </div>
+                <div class="pastel-card p-4 text-center opacity-50" id="ach-4">
+                    <div class="text-3xl mb-2">👑</div>
+                    <p class="font-bold text-sm text-gray-600">Maestro</p>
+                    <p class="text-xs text-gray-400">Sin errores</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="pastel-card p-8 max-w-md w-full text-center transform scale-100 transition-transform">
+            <div class="text-6xl mb-4 floating">🎉</div>
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">¡Excelente!</h2>
+            <p class="text-gray-600 mb-4" id="successMessage">Has dominado la suma de polinomios</p>
+            <div class="flex justify-center gap-2 mb-6" id="starsEarned">
+                <span class="star text-4xl">⭐</span>
+                <span class="star text-4xl">⭐</span>
+                <span class="star text-4xl">⭐</span>
+            </div>
+            <button onclick="closeModal()" class="pastel-btn w-full py-3 text-lg">
+                Continuar 🚀
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        let state = {
+            score: 0,
+            level: 1,
+            lives: 3,
+            challengeStreak: 0,
+            totalCorrect: 0,
+            achievements: [],
+            currentChallenge: 0,
+            practiceTerms: []
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initPractice();
+            generateChallenge();
+        });
+
+        // Navigation
+        function showSection(section) {
+            // Hide all sections
+            document.getElementById('learn-section').classList.add('hidden-section');
+            document.getElementById('practice-section').classList.add('hidden-section');
+            document.getElementById('challenge-section').classList.add('hidden-section');
+            
+            // Show selected
+            document.getElementById(section + '-section').classList.remove('hidden-section');
+            document.getElementById(section + '-section').classList.add('fade-in');
+            
+            // Update tabs
+            document.querySelectorAll('[id^="tab-"]').forEach(tab => {
+                tab.style.opacity = '0.6';
+                tab.style.transform = 'scale(0.95)';
+            });
+            document.getElementById('tab-' + section).style.opacity = '1';
+            document.getElementById('tab-' + section).style.transform = 'scale(1)';
+        }
+
+        // Practice Mode
+        function initPractice() {
+            const terms = [
+                { coef: 4, var: 'x', exp: 2, id: 't1', group: 'x2' },
+                { coef: 2, var: 'x', exp: 2, id: 't2', group: 'x2' },
+                { coef: 3, var: 'x', exp: 1, id: 't3', group: 'x1' },
+                { coef: -1, var: 'x', exp: 1, id: 't4', group: 'x1' },
+                { coef: -2, var: 'c', exp: 0, id: 't5', group: 'c' },
+                { coef: 5, var: 'c', exp: 0, id: 't6', group: 'c' }
+            ];
+            
+            state.practiceTerms = terms;
+            renderTerms();
+            setupDragAndDrop();
+        }
+
+        function renderTerms() {
+            const container = document.getElementById('termsContainer');
+            container.innerHTML = '';
+            
+            state.practiceTerms.forEach(term => {
+                const div = document.createElement('div');
+                div.className = 'term-card bounce-in';
+                div.draggable = true;
+                div.dataset.id = term.id;
+                div.dataset.group = term.group;
+                div.innerHTML = formatTerm(term);
+                container.appendChild(div);
+            });
+        }
+
+        function formatTerm(term) {
+            let sign = term.coef > 0 ? '+' : '-';
+            let absCoef = Math.abs(term.coef);
+            let coefStr = absCoef === 1 && term.var !== 'c' ? '' : absCoef;
+            
+            if (term.var === 'c') {
+                return `<span class="text-${term.coef > 0 ? 'pink' : 'red'}-500 font-bold">${sign}</span> <span class="text-gray-700">${absCoef}</span>`;
+            }
+            
+            return `<span class="text-${term.coef > 0 ? 'pink' : 'red'}-500 font-bold">${sign}</span> <span class="text-gray-700">${coefStr}${term.var}<span class="exponent">${term.exp}</span></span>`;
+        }
+
+        function setupDragAndDrop() {
+            let draggedElement = null;
+            
+            document.addEventListener('dragstart', (e) => {
+                if (e.target.classList.contains('term-card')) {
+                    draggedElement = e.target;
+                    e.target.classList.add('dragging');
+                }
+            });
+            
+            document.addEventListener('dragend', (e) => {
+                if (e.target.classList.contains('term-card')) {
+                    e.target.classList.remove('dragging');
+                }
+            });
+            
+            const dropZone = document.getElementById('dropZone');
+            
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('drag-over');
+            });
+            
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('drag-over');
+            });
+            
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('drag-over');
+                
+                if (draggedElement && dropZone.children.length < 7) {
+                    if (dropZone.querySelector('p')) {
+                        dropZone.querySelector('p').remove();
+                    }
+                    const clone = draggedElement.cloneNode(true);
+                    clone.draggable = false;
+                    dropZone.appendChild(clone);
+                    draggedElement.style.opacity = '0.3';
+                    draggedElement.draggable = false;
+                    
+                    createParticles(e.clientX, e.clientY);
+                }
+            });
+        }
+
+        function createParticles(x, y) {
+            for (let i = 0; i < 8; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                particle.style.width = '10px';
+                particle.style.height = '10px';
+                particle.style.background = ['#ffb6c1', '#ffd1dc', '#a8d8ea', '#b8e0d2'][Math.floor(Math.random() * 4)];
+                particle.style.borderRadius = '50%';
+                particle.style.setProperty('--tx', (Math.random() - 0.5) * 100 + 'px');
+                particle.style.setProperty('--ty', (Math.random() - 0.5) * 100 + 'px');
+                document.body.appendChild(particle);
+                setTimeout(() => particle.remove(), 1000);
+            }
+        }
+
+        function checkPractice() {
+            const dropZone = document.getElementById('dropZone');
+            const terms = Array.from(dropZone.querySelectorAll('.term-card'));
+            const feedback = document.getElementById('practiceFeedback');
+            
+            if (terms.length === 0) {
+                feedback.textContent = '¡Arrastra los términos primero!';
+                feedback.className = 'mt-4 text-center font-bold text-lg text-orange-500';
+                feedback.classList.remove('hidden');
+                return;
+            }
+            
+            // Check if all x² terms are together, all x terms together, etc.
+            const groups = {};
+            terms.forEach(term => {
+                const group = term.dataset.group;
+                if (!groups[group]) groups[group] = [];
+                groups[group].push(term);
+            });
+            
+            const correctGroups = {
+                'x2': 2, // Should have 2 terms (4x² and 2x²)
+                'x1': 2, // Should have 2 terms (3x and -x)
+                'c': 2   // Should have 2 terms (-2 and 5)
+            };
+            
+            let correct = true;
+            for (let group in correctGroups) {
+                if (!groups[group] || groups[group].length !== correctGroups[group]) {
+                    correct = false;
+                    break;
+                }
+            }
+            
+            if (correct && Object.keys(groups).length === 3) {
+                feedback.textContent = '¡Perfecto! Has agrupado correctamente. Resultado: 6x² + 2x + 3';
+                feedback.className = 'mt-4 text-center font-bold text-lg text-green-600';
+                feedback.classList.remove('hidden');
+                
+                terms.forEach(term => term.classList.add('matched'));
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#ffb6c1', '#ffd1dc', '#a8d8ea', '#b8e0d2']
+                });
+                
+                updateScore(50);
+                document.getElementById('practiceProgress').style.width = '100%';
+            } else {
+                feedback.textContent = 'Revisa los grupos. Recuerda: solo términos con la misma letra y exponente van juntos.';
+                feedback.className = 'mt-4 text-center font-bold text-lg text-red-500';
+                feedback.classList.remove('hidden');
+                dropZone.classList.add('shake');
+                setTimeout(() => dropZone.classList.remove('shake'), 500);
+            }
+        }
+
+        function resetPractice() {
+            document.getElementById('dropZone').innerHTML = '<p class="text-gray-400 w-full text-center">Arrastra aquí los términos semejantes...</p>';
+            document.getElementById('practiceFeedback').classList.add('hidden');
+            document.getElementById('practiceProgress').style.width = '0%';
+            initPractice();
+        }
+
+        // Calculator
+        function validateInput(input) {
+            // Allow numbers, x, ^, +, -, spaces
+            input.value = input.value.replace(/[^0-9xX\s\+\-\^]/g, '');
+        }
+
+        function calculateSum() {
+            const p1 = document.getElementById('poly1').value.trim();
+            const p2 = document.getElementById('poly2').value.trim();
+            
+            if (!p1 || !p2) {
+                alert('Ingresa ambos polinomios');
+                return;
+            }
+            
+            try {
+                const result = sumPolynomials(p1, p2);
+                document.getElementById('calcResult').innerHTML = result.html;
+                document.getElementById('calcSteps').classList.remove('hidden');
+                
+                const stepsList = document.getElementById('stepsList');
+                stepsList.innerHTML = '';
+                result.steps.forEach(step => {
+                    const li = document.createElement('li');
+                    li.textContent = step;
+                    stepsList.appendChild(li);
+                });
+                
+                updateScore(10);
+            } catch (e) {
+                document.getElementById('calcResult').textContent = 'Error en formato';
+            }
+        }
+
+        function sumPolynomials(p1, p2) {
+            // Simple parser for polynomials
+            function parsePoly(str) {
+                const terms = {};
+                // Insert + before - if not at start
+                str = str.replace(/-/g, '+-');
+                if (str.startsWith('+')) str = str.substring(1);
+                
+                const parts = str.split('+').filter(p => p.trim());
+                
+                parts.forEach(part => {
+                    part = part.trim();
+                    let coef = 1;
+                    let exp = 0;
+                    
+                    if (part.includes('x')) {
+                        const xIndex = part.toLowerCase().indexOf('x');
+                        const coefPart = part.substring(0, xIndex).trim();
+                        coef = coefPart === '' ? 1 : parseInt(coefPart);
+                        if (part.includes('^')) {
+                            exp = parseInt(part.split('^')[1]);
+                        } else {
+                            exp = 1;
+                        }
+                    } else {
+                        coef = parseInt(part);
+                    }
+                    
+                    terms[exp] = (terms[exp] || 0) + coef;
+                });
+                
+                return terms;
+            }
+            
+            const terms1 = parsePoly(p1);
+            const terms2 = parsePoly(p2);
+            const result = {};
+            const steps = [];
+            
+            // Combine
+            [...Object.keys(terms1), ...Object.keys(terms2)].forEach(exp => {
+                const e = parseInt(exp);
+                const v1 = terms1[e] || 0;
+                const v2 = terms2[e] || 0;
+                result[e] = v1 + v2;
+                
+                if (v1 !== 0 && v2 !== 0) {
+                    steps.push(`x^${e}: ${v1} + ${v2} = ${result[e]}`);
+                }
+            });
+            
+            // Format result
+            let html = '';
+            const exps = Object.keys(result).sort((a, b) => b - a);
+            let first = true;
+            
+            exps.forEach(exp => {
+                const coef = result[exp];
+                if (coef === 0) return;
+                
+                const sign = coef < 0 ? '-' : (first ? '' : '+');
+                const absCoef = Math.abs(coef);
+                let term = '';
+                
+                if (exp == 0) {
+                    term = absCoef;
+                } else if (exp == 1) {
+                    term = (absCoef === 1 ? '' : absCoef) + 'x';
+                } else {
+                    term = (absCoef === 1 ? '' : absCoef) + 'x<span class="exponent">' + exp + '</span>';
+                }
+                
+                html += ` ${sign} ${term}`;
+                first = false;
+            });
+            
+            return { html: html.trim() || '0', steps };
+        }
+
+        // Challenge Mode
+        function generateChallenge() {
+            const types = [
+                { 
+                    problem: '(3x² + 2x - 4) + (5x² - 3x + 2)',
+                    options: ['8x² - x - 2', '8x² + 5x - 2', '8x² - x + 2', '2x² - x - 2'],
+                    correct: 0
+                },
+                {
+                    problem: '(2x³ + 4x² - x) + (3x³ - 2x² + 5x)',
+                    options: ['5x³ + 2x² + 4x', '5x³ + 6x² + 4x', '5x³ + 2x² - 6x', '6x³ + 2x² + 4x'],
+                    correct: 0
+                },
+                {
+                    problem: '(7x - 3) + (2x + 8)',
+                    options: ['9x + 5', '9x + 11', '5x + 5', '9x - 11'],
+                    correct: 0
+                },
+                {
+                    problem: '(x² + 5x - 6) + (-2x² + 3x + 4)',
+                    options: ['-x² + 8x - 2', '-x² + 2x - 2', '3x² + 8x - 2', '-x² + 8x + 2'],
+                    correct: 0
+                },
+                {
+                    problem: '(4x⁴ + 2x² - 1) + (x⁴ - 3x² + 5)',
+                    options: ['5x⁴ - x² + 4', '5x⁴ + 5x² + 4', '3x⁴ - x² + 4', '5x⁴ - x² - 4'],
+                    correct: 0
+                }
+            ];
+            
+            const challenge = types[state.currentChallenge % types.length];
+            document.getElementById('challengeProblem').innerHTML = formatMath(challenge.problem);
+            document.getElementById('challengeNumber').textContent = state.currentChallenge + 1;
+            
+            const optionsContainer = document.getElementById('challengeOptions');
+            optionsContainer.innerHTML = '';
+            
+            challenge.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'pastel-btn px-6 py-3 text-lg';
+                btn.innerHTML = formatMath(opt);
+                btn.onclick = () => checkChallenge(idx, challenge.correct);
+                optionsContainer.appendChild(btn);
+            });
+            
+            document.getElementById('nextChallengeBtn').classList.add('hidden');
+            document.getElementById('challengeFeedback').classList.add('hidden');
+        }
+
+        function formatMath(str) {
+            return str.replace(/\^(\d)/g, '<span class="exponent">$1</span>')
+                     .replace(/x/g, 'x')
+                     .replace(/\+/g, '<span class="text-pink-500">+</span>')
+                     .replace(/\-/g, '<span class="text-red-500">-</span>');
+        }
+
+        function checkChallenge(selected, correct) {
+            const buttons = document.querySelectorAll('#challengeOptions button');
+            const feedback = document.getElementById('challengeFeedback');
+            
+            buttons.forEach(btn => btn.disabled = true);
+            
+            if (selected === correct) {
+                buttons[selected].classList.remove('pastel-btn');
+                buttons[selected].style.background = 'linear-gradient(135deg, #81c784 0%, #a5d6a7 100%)';
+                feedback.textContent = '¡Correcto! +20 XP';
+                feedback.className = 'text-center p-4 rounded-xl mb-4 font-bold text-lg bg-green-100 text-green-700 border-2 border-green-300';
+                feedback.classList.remove('hidden');
+                
+                state.challengeStreak++;
+                state.totalCorrect++;
+                updateScore(20);
+                
+                if (state.challengeStreak >= 3) {
+                    unlockAchievement('ach-2');
+                }
+                if (state.score >= 100) {
+                    unlockAchievement('ach-3');
+                }
+                
+                confetti({
+                    particleCount: 150,
+                    spread: 100,
+                    origin: { y: 0.6 },
+                    colors: ['#ffd700', '#ffb6c1', '#81c784']
+                });
+                
+                document.getElementById('nextChallengeBtn').classList.remove('hidden');
+            } else {
+                buttons[selected].classList.remove('pastel-btn');
+                buttons[selected].style.background = 'linear-gradient(135deg, #e57373 0%, #ef9a9a 100%)';
+                buttons[correct].style.background = 'linear-gradient(135deg, #81c784 0%, #a5d6a7 100%)';
+                
+                feedback.textContent = 'Incorrecto. ¡Intenta de nuevo!';
+                feedback.className = 'text-center p-4 rounded-xl mb-4 font-bold text-lg bg-red-100 text-red-700 border-2 border-red-300';
+                feedback.classList.remove('hidden');
+                
+                state.challengeStreak = 0;
+                state.lives--;
+                updateLives();
+                
+                if (state.lives === 0) {
+                    setTimeout(() => {
+                        alert('¡Game Over! Tus vidas se acabaron. Reiniciando...');
+                        state.lives = 3;
+                        state.score = Math.max(0, state.score - 50);
+                        updateLives();
+                        updateScore(0);
+                    }, 1000);
+                } else {
+                    setTimeout(() => {
+                        generateChallenge();
+                    }, 2000);
+                }
+            }
+            
+            checkAchievements();
+        }
+
+        function nextChallenge() {
+            state.currentChallenge++;
+            generateChallenge();
+        }
+
+        function updateLives() {
+            const livesContainer = document.getElementById('lives');
+            livesContainer.innerHTML = '❤️'.repeat(state.lives) + '🖤'.repeat(3 - state.lives);
+        }
+
+        function updateScore(points) {
+            state.score += points;
+            document.getElementById('totalScore').textContent = state.score;
+            document.getElementById('challengeScore').textContent = state.score;
+            
+            // Level up
+            const newLevel = Math.floor(state.score / 100) + 1;
+            if (newLevel > state.level) {
+                state.level = newLevel;
+                document.getElementById('level').textContent = 'Nivel ' + state.level;
+                showModal('¡Subiste de Nivel!', 'Ahora eres Nivel ' + state.level);
+            }
+        }
+
+        function unlockAchievement(id) {
+            if (!state.achievements.includes(id)) {
+                state.achievements.push(id);
+                const el = document.getElementById(id);
+                el.classList.remove('opacity-50');
+                el.classList.add('bounce-in');
+                el.style.background = 'linear-gradient(135deg, #fff9c4 0%, #fff59d 100%)';
+                el.style.transform = 'scale(1.05)';
+            }
+        }
+
+        function checkAchievements() {
+            if (state.totalCorrect >= 1) unlockAchievement('ach-1');
+            if (state.totalCorrect >= 10 && state.lives === 3) unlockAchievement('ach-4');
+        }
+
+        function showModal(title, message) {
+            document.getElementById('successMessage').textContent = message;
+            document.getElementById('successModal').classList.remove('hidden');
+            document.getElementById('successModal').classList.add('flex');
+        }
+
+        function closeModal() {
+            document.getElementById('successModal').classList.add('hidden');
+            document.getElementById('successModal').classList.remove('flex');
+        }
+
+        // Initialize first tab
+        showSection('learn');
+    </script>
+</body>
+</html>
